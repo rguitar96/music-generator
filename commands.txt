@@ -1,0 +1,8 @@
+sudo chown root:root /home/rodrigo/foxdot/pyfoxdot.sh
+sudo chmod 700 /home/rodrigo/foxdot/pyfoxdot.sh
+
+sudo visudo
+
+
+sudo apt-get install python3-pyside
+pip3 install pyqt5 --only-binary pyqt5

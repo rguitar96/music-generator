@@ -1,0 +1,13 @@
+MELODY:
+    lazer, charm, bell, gong, viola, pluck, blip, orient, marimba, twang, karp, arpy, nylon, sitar, star, pads, pasha, sinepad
+CHORD:
+    varsaw, scatter, quin, spark, ripple, creep, zap, bug, pulse, saw, donk, squish, swell, razz, prophet, keys, 
+AMBIENT_SOFT:
+    crunch, soprano, scratch, klank, feel, glass, soft, ambi, space
+AMBIENT_NOISE:
+    noise, growl, rave, fuzz, snick
+BASS:
+    dab, bass, dirt, dub, jbass, sawbass, dbass
+
+
+'sinepad'
