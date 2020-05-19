@@ -1,7 +1,7 @@
 import json
 import subprocess
 import numpy as np
-import mayavi.mlab as mlab
+#import mayavi.mlab as mlab
 import moviepy.editor as mpy
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import gizeh
