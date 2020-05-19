@@ -8,9 +8,9 @@ import gizeh
 from TwitterAPI import TwitterAPI
 import time, os, json, sys
 
-#from credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
+from credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
 
-mlab.options.offscreen = True
+#mlab.options.offscreen = True
 
 
 def hsl_to_rgb(h, s, l):
@@ -145,10 +145,10 @@ CONFIG_PARAMETERS = {"num_instruments": 3, "chord_duration": 2, "chord_number": 
 with open('config/params.json', 'w') as outfile:
     json.dump(CONFIG_PARAMETERS, outfile)
 
-CONSUMER_KEY = os.environ['CONSUMER_KEY']
-CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-ACCESS_KEY = os.environ['ACCESS_KEY']
-ACCESS_SECRET = os.environ['ACCESS_SECRET']
+#CONSUMER_KEY = os.environ['CONSUMER_KEY']
+#CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
+#ACCESS_KEY = os.environ['ACCESS_KEY']
+#ACCESS_SECRET = os.environ['ACCESS_SECRET']
 
 api = TwitterAPI(
     CONSUMER_KEY,
@@ -178,39 +178,10 @@ while True:
             if user['screen_name'] != "musgenbot":
                 print("funca")
                 start_status = "Just for you!"
-                #start_post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 'auto_populate_reply_metadata': True})
+                start_post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 'auto_populate_reply_metadata': True})
                 #print(start_post.json())
                 
                 time.sleep(5)
-
-
-                # *** VIDEO GENERATION ***
-                subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
-
-                W,H = 1024,1024
-                NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
-
-                # sin function: f(x) = amplitude * sin(period * (x + phase_shift)) + vertical_shift
-                amplitude = CONFIG_PARAMETERS["percussion_interval"] / 16
-                phase_shift = amplitude + 1
-                vertical_shift = amplitude + 0.2
-                frequency = CONFIG_PARAMETERS["bpm"] / 60 / 2
-
-
-                clip = mpy.VideoClip(make_frame, duration=CONFIG_PARAMETERS["song_duration"] + 1)
-
-                clip = clip.set_audio(mpy.AudioFileClip("output/twitter/music.mp3"))
-
-                clip.write_videofile("output/twitter/video.mp4", fps=10, temp_audiofile="output/twitter/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac")
-
-                ffmpeg_extract_subclip("output/twitter/video.mp4", 1, CONFIG_PARAMETERS["song_duration"] + 1, targetname="output/twitter/final_video.mp4")
-                time.sleep(2)
-                # *** END OF VIDEO GENERATION ***
-
-                media_upload = upload_video("output/twitter/final_video.mp4")
-                status_pick = 'video'
-                post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 
-                                        'auto_populate_reply_metadata': True, 'media_ids': media_upload.json()['media_id']})
     since_id = new_since_id
 
     f = open("config/last_id", "w")
@@ -218,6 +189,37 @@ while True:
     f.close()
 
     time.sleep(5)
+'''
+# *** VIDEO GENERATION ***
+subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
+
+W,H = 1024,1024
+NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
+
+# sin function: f(x) = amplitude * sin(period * (x + phase_shift)) + vertical_shift
+amplitude = CONFIG_PARAMETERS["percussion_interval"] / 16
+phase_shift = amplitude + 1
+vertical_shift = amplitude + 0.2
+frequency = CONFIG_PARAMETERS["bpm"] / 60 / 2
+
+
+clip = mpy.VideoClip(make_frame, duration=CONFIG_PARAMETERS["song_duration"] + 1)
+
+clip = clip.set_audio(mpy.AudioFileClip("output/twitter/music.mp3"))
+
+clip.write_videofile("output/twitter/video.mp4", fps=10, temp_audiofile="output/twitter/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac")
+
+ffmpeg_extract_subclip("output/twitter/video.mp4", 1, CONFIG_PARAMETERS["song_duration"] + 1, targetname="output/twitter/final_video.mp4")
+time.sleep(2)
+# *** END OF VIDEO GENERATION ***
+
+media_upload = upload_video("output/twitter/final_video.mp4")
+status_pick = 'video'
+post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 
+                        'auto_populate_reply_metadata': True, 'media_ids': media_upload.json()['media_id']})
+'''
+    
+
 
 
 print("FINISH\n")
