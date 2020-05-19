@@ -1,31 +1,15 @@
 import json
 import subprocess
-
-CONFIG_PARAMETERS = {"num_instruments": 3, "chord_duration": 2, "chord_number": 4, "percussion_interval": 2,
-                    "bpm": 120, "root": 0, "song_duration": 12, "melody_possibilities": [1/4,1/2,1,2]}
-
-
-with open('config/params.json', 'w') as outfile:
-    json.dump(CONFIG_PARAMETERS, outfile)
-
-subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
-
-
 import numpy as np
 import mayavi.mlab as mlab
 import moviepy.editor as mpy
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import gizeh
+from TwitterAPI import TwitterAPI
+import time, os, json, sys
 
 mlab.options.offscreen = True
 
-# VISUALIZATIONS TAKEN FROM: 
-# http://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/
-# https://zulko.github.io/blog/2014/09/20/vector-animations-with-python/
-
-
-W,H = 1024,1024
-NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
 
 def hsl_to_rgb(h, s, l):
     def hue_to_rgb(p, q, t):
@@ -47,11 +31,46 @@ def hsl_to_rgb(h, s, l):
 
     return r, g, b
 
-# sin function: f(x) = amplitude * sin(period * (x + phase_shift)) + vertical_shift
-amplitude = CONFIG_PARAMETERS["percussion_interval"] / 16
-phase_shift = amplitude + 1
-vertical_shift = amplitude + 0.2
-frequency = CONFIG_PARAMETERS["bpm"] / 60 / 2
+def check_status(request):
+		print(request.text)
+		if request.status_code < 200 or request.status_code > 299:
+			print(request.status_code)
+			print(request.text)
+			sys.exit(0)
+
+def upload_video(filename):
+    # Upload a video
+    bytes_sent = 0
+    total_bytes = os.path.getsize(filename)
+    file = open(filename, 'rb')
+
+    # Initial request
+    request = api.request('media/upload', {'command':'INIT', 'media_type':'video/mp4', 'total_bytes':total_bytes, 'media_category': 'tweet_video'})
+    check_status(request)
+    media_id = request.json()['media_id']
+    segment_id = 0
+
+    # Chunk and upload video
+    while bytes_sent < total_bytes:
+        chunk = file.read(4*1024*1024)
+
+        request = api.request('media/upload', {'command':'APPEND', 'media_id':media_id, 'segment_index':segment_id}, {'media':chunk})
+        check_status(request)
+
+        segment_id = segment_id + 1
+        bytes_sent = file.tell()
+
+        print('[' + str(total_bytes) + ']', str(bytes_sent))
+
+    request = api.request('media/upload', {'command':'FINALIZE', 'media_id':media_id})
+    check_status(request)
+
+    return request
+
+
+# VISUALIZATIONS TAKEN FROM: 
+# http://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/
+# https://zulko.github.io/blog/2014/09/20/vector-animations-with-python/
 
 def half(t, side="left"):
     points = list(gizeh.geometry.polar_polygon(NFACES, amplitude * np.sin(2 * np.pi * frequency * t + phase_shift) + vertical_shift, NSQUARES))
@@ -112,10 +131,94 @@ def make_frame(t):
     return mlab.screenshot(antialiased=True)
 '''
 
+CONFIG_PARAMETERS = {"num_instruments": 3, "chord_duration": 2, "chord_number": 4, "percussion_interval": 2,
+                    "bpm": 120, "root": 0, "song_duration": 12, "melody_possibilities": [1/4,1/2,1,2]}
+
+
+with open('config/params.json', 'w') as outfile:
+    json.dump(CONFIG_PARAMETERS, outfile)
+
+
+api = TwitterAPI(
+    CONSUMER_KEY,
+    CONSUMER_SECRET,
+    ACCESS_KEY,
+    ACCESS_SECRET
+)
+
+since_id = 1
+while True:
+    print("new try")
+    new_since_id = since_id
+    mentions = api.request('statuses/mentions_timeline', {'since_id': new_since_id}).json()
+    mentions = sorted(mentions, key=lambda k:k['id'])
+    if mentions:
+        print("mentions")
+        for tweet in mentions:
+            print("tweet:")
+            tweet_text = tweet['text'].encode('ascii', 'ignore')
+            print(tweet_text)
+
+            new_since_id = max(tweet['id'], new_since_id)
+            
+            user = tweet['user']
+
+            if user['screen_name'] != "musgenbot":
+                print("funca")
+                start_status = ""
+                #start_post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 'auto_populate_reply_metadata': True})
+                time.sleep(5)
+
+
+                # *** VIDEO GENERATION ***
+                subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
+
+                W,H = 1024,1024
+                NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
+
+                # sin function: f(x) = amplitude * sin(period * (x + phase_shift)) + vertical_shift
+                amplitude = CONFIG_PARAMETERS["percussion_interval"] / 16
+                phase_shift = amplitude + 1
+                vertical_shift = amplitude + 0.2
+                frequency = CONFIG_PARAMETERS["bpm"] / 60 / 2
+
+
+                clip = mpy.VideoClip(make_frame, duration=CONFIG_PARAMETERS["song_duration"] + 1)
+
+                clip = clip.set_audio(mpy.AudioFileClip("output/twitter/music.mp3"))
+
+                clip.write_videofile("output/twitter/video.mp4", fps=10, temp_audiofile="output/twitter/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac")
+
+                ffmpeg_extract_subclip("output/twitter/video.mp4", 1, CONFIG_PARAMETERS["song_duration"] + 1, targetname="output/twitter/final_video.mp4")
+                # *** END OF VIDEO GENERATION ***
+
+                media_upload = upload_video("output/twitter/final_video.mp4")
+                status_pick = 'video'
+                post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 
+                                        'auto_populate_reply_metadata': True, 'media_ids': media_upload.json()['media_id']})
+    since_id = new_since_id
+    time.sleep(5)
+
+
+'''
+subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
+
+W,H = 400,400
+NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
+
+# sin function: f(x) = amplitude * sin(period * (x + phase_shift)) + vertical_shift
+amplitude = CONFIG_PARAMETERS["percussion_interval"] / 16
+phase_shift = amplitude + 1
+vertical_shift = amplitude + 0.2
+frequency = CONFIG_PARAMETERS["bpm"] / 60 / 2
+
+
 clip = mpy.VideoClip(make_frame, duration=CONFIG_PARAMETERS["song_duration"] + 1)
 
-clip.write_videofile("output/twitter/video.mp4", audio="output/twitter/music.mp3", fps=15)
+clip = clip.set_audio(mpy.AudioFileClip("output/twitter/music.mp3"))
 
-ffmpeg_extract_subclip(clip, 1, CONFIG_PARAMETERS["song_duration"] + 1, targetname="test.mp4")
+clip.write_videofile("output/twitter/video.mp4", fps=10, temp_audiofile="output/twitter/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac")
 
-print("FINISH")
+ffmpeg_extract_subclip("output/twitter/video.mp4", 1, CONFIG_PARAMETERS["song_duration"] + 1, targetname="output/twitter/final_video.mp4")
+'''
+print("FINISH\n")
