@@ -34,14 +34,14 @@ def hsl_to_rgb(h, s, l):
     return r, g, b
 
 def check_status(request):
-		print(request.text)
+    print(request.text)
+    sys.stdout.flush()
+    if request.status_code < 200 or request.status_code > 299:
+        print(request.status_code)
         sys.stdout.flush()
-		if request.status_code < 200 or request.status_code > 299:
-			print(request.status_code)
-            sys.stdout.flush()
-			print(request.text)
-            sys.stdout.flush()
-			sys.exit(0)
+        print(request.text)
+        sys.stdout.flush()
+        sys.exit(0)
 
 def upload_video(filename):
     # Upload a video
