@@ -35,9 +35,12 @@ def hsl_to_rgb(h, s, l):
 
 def check_status(request):
 		print(request.text)
+        sys.stdout.flush()
 		if request.status_code < 200 or request.status_code > 299:
 			print(request.status_code)
+            sys.stdout.flush()
 			print(request.text)
+            sys.stdout.flush()
 			sys.exit(0)
 
 def upload_video(filename):
@@ -63,6 +66,7 @@ def upload_video(filename):
         bytes_sent = file.tell()
 
         print('[' + str(total_bytes) + ']', str(bytes_sent))
+        sys.stdout.flush()
 
     request = api.request('media/upload', {'command':'FINALIZE', 'media_id':media_id})
 
@@ -161,15 +165,19 @@ f = open("config/last_id", "r")
 since_id = int(f.read())
 while True:
     print("new try")
+    sys.stdout.flush()
     new_since_id = since_id
     mentions = api.request('statuses/mentions_timeline', {'since_id': new_since_id}).json()
     mentions = sorted(mentions, key=lambda k:k['id'])
     if mentions:
         print("mentions")
+        sys.stdout.flush()
         for tweet in mentions:
             print("tweet:")
+            sys.stdout.flush()
             tweet_text = tweet['text'].encode('ascii', 'ignore')
             print(tweet_text)
+            sys.stdout.flush()
 
             new_since_id = max(tweet['id'], new_since_id)
             
@@ -177,6 +185,7 @@ while True:
 
             if user['screen_name'] != "musgenbot":
                 print("funca")
+                sys.stdout.flush()
                 start_status = "Just for you!"
                 start_post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 'auto_populate_reply_metadata': True})
                 #print(start_post.json())
@@ -223,3 +232,4 @@ post = api.request('statuses/update', {'status': start_status, 'in_reply_to_stat
 
 
 print("FINISH\n")
+sys.stdout.flush()
