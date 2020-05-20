@@ -162,7 +162,8 @@ api = TwitterAPI(
 )
 
 f = open("config/last_id", "r")
-since_id = int(f.read())
+#since_id = int(f.read())
+since_id = 1
 while True:
     print("new try")
     sys.stdout.flush()
@@ -193,11 +194,11 @@ while True:
                 time.sleep(5)
     since_id = new_since_id
 
-    f = open("config/last_id", "w")
-    f.write(str(since_id))
-    f.close()
-
     time.sleep(5)
+
+#f = open("config/last_id", "w")
+#f.write(str(since_id))
+#f.close()
 '''
 # *** VIDEO GENERATION ***
 subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
