@@ -1,9 +1,8 @@
 # work
 jackd
 lame
-
-# do not work
-jack_rec
 psmisc
 xvfb
-sclang
+
+# do not work
+supercollider-language
