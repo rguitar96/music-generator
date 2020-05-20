@@ -191,7 +191,7 @@ while True:
                 #print(start_post.json())
 
                 # *** VIDEO GENERATION ***
-                subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
+                subprocess.check_call(['./foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
 
                 W,H = 1024,1024
                 NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
