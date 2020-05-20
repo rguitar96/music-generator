@@ -8,7 +8,7 @@ import gizeh
 from TwitterAPI import TwitterAPI
 import time, os, json, sys
 
-from credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
+#from credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_KEY, ACCESS_SECRET
 
 #mlab.options.offscreen = True
 
@@ -149,10 +149,10 @@ CONFIG_PARAMETERS = {"num_instruments": 3, "chord_duration": 2, "chord_number": 
 with open('config/params.json', 'w') as outfile:
     json.dump(CONFIG_PARAMETERS, outfile)
 
-#CONSUMER_KEY = os.environ['CONSUMER_KEY']
-#CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-#ACCESS_KEY = os.environ['ACCESS_KEY']
-#ACCESS_SECRET = os.environ['ACCESS_SECRET']
+CONSUMER_KEY = os.environ['CONSUMER_KEY']
+CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
+ACCESS_KEY = os.environ['ACCESS_KEY']
+ACCESS_SECRET = os.environ['ACCESS_SECRET']
 
 api = TwitterAPI(
     CONSUMER_KEY,
