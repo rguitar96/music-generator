@@ -51,7 +51,6 @@ rm -f foxy.sample.pipe
 sleep 3
 rm -f /tmp/.X99-lock
 export DISPLAY=:99
-ldconfig /usr/local/lib/ 
 Xvfb :99 -ac -screen 0 1280x1024x16 &
 jackd -d dummy &
 sleep 3
