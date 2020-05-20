@@ -10,10 +10,10 @@ from requests_oauthlib import OAuth1
 MEDIA_ENDPOINT_URL = 'https://upload.twitter.com/1.1/media/upload.json'
 POST_TWEET_URL = 'https://api.twitter.com/1.1/statuses/update.json'
 
-CONSUMER_KEY = '4fjnITulNg7XOxJPNrTuJmDww'#keep the quotes, replace this with your consumer key
-CONSUMER_SECRET = 'ewg6L07dBooxfwlC0exZyYEOtifvUTd1B73FKAm6BtueeLlpoJ'#keep the quotes, replace this with your consumer secret key
-ACCESS_TOKEN = '1259258281404612609-QHcVVDShK7kyUiwiNMHPlQMXT8b5wf'#keep the quotes, replace this with your access token
-ACCESS_TOKEN_SECRET = 'eHu91Qupe52ATXegnVXiyn7al5pBqGTy224HqDBjOogOF'#keep the quotes, replace this with your access token secret
+CONSUMER_KEY = '-'#keep the quotes, replace this with your consumer key
+CONSUMER_SECRET = '-'#keep the quotes, replace this with your consumer secret key
+ACCESS_TOKEN = '-'#keep the quotes, replace this with your access token
+ACCESS_TOKEN_SECRET = '-'#keep the quotes, replace this with your access token secret
 
 VIDEO_FILENAME = 'output/videoplayback'
 

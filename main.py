@@ -161,6 +161,7 @@ api = TwitterAPI(
     ACCESS_SECRET
 )
 
+#since_id = 1
 since_id = int(os.environ['LAST_ID'])
 while True:
     print("new try")
@@ -189,14 +190,40 @@ while True:
                 start_post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 'auto_populate_reply_metadata': True})
                 #print(start_post.json())
 
+                # *** VIDEO GENERATION ***
                 subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
+
+                W,H = 1024,1024
+                NFACES, R, NSQUARES, DURATION = 5, CONFIG_PARAMETERS["bpm"] / 60,  100, CONFIG_PARAMETERS["bpm"] / 60
+
+                # sin function: f(x) = amplitude * sin(period * (x + phase_shift)) + vertical_shift
+                amplitude = CONFIG_PARAMETERS["percussion_interval"] / 16
+                phase_shift = amplitude + 1
+                vertical_shift = amplitude + 0.2
+                frequency = CONFIG_PARAMETERS["bpm"] / 60 / 2
+
+
+                clip = mpy.VideoClip(make_frame, duration=CONFIG_PARAMETERS["song_duration"] + 1)
+
+                clip = clip.set_audio(mpy.AudioFileClip("output/twitter/music.mp3"))
+
+                clip.write_videofile("output/twitter/video.mp4", fps=10, temp_audiofile="output/twitter/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac")
+
+                ffmpeg_extract_subclip("output/twitter/video.mp4", 1, CONFIG_PARAMETERS["song_duration"] + 1, targetname="output/twitter/final_video.mp4")
+                time.sleep(2)
+                # *** END OF VIDEO GENERATION ***
+
+                media_upload = upload_video("output/twitter/final_video.mp4")
+                status_pick = 'video'
+                post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 
+                        'auto_populate_reply_metadata': True, 'media_ids': media_upload.json()['media_id']})
                 
                 time.sleep(5)
     since_id = new_since_id
-
     os.environ['LAST_ID'] = str(since_id)
 
     time.sleep(5)
+    
 
 '''
 # *** VIDEO GENERATION ***
