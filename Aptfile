@@ -1,5 +1,9 @@
-killall
+# work
 jackd
-Xvfb
-jack_rec
 lame
+
+# do not work
+jack_rec
+psmisc
+xvfb
+sclang
