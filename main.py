@@ -188,6 +188,8 @@ while True:
                 start_status = "Just for you!"
                 start_post = api.request('statuses/update', {'status': start_status, 'in_reply_to_status_id': tweet['id'], 'auto_populate_reply_metadata': True})
                 #print(start_post.json())
+
+                subprocess.check_call(['sudo', './foxsamply', '-f', 'markov.py', '-s', str(CONFIG_PARAMETERS["song_duration"] + 1), '-o', 'output/twitter/music'])
                 
                 time.sleep(5)
     since_id = new_since_id
