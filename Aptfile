@@ -1,0 +1,5 @@
+killall
+jackd
+Xvfb
+jack_rec
+lame
